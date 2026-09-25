@@ -1,0 +1,10 @@
+.env*
+!.env.example
+.git/
+.idea/
+.next/
+node_modules/
+private/
+test-results/
+playwright-report/
+*.tsbuildinfo
