@@ -46,7 +46,7 @@ async function audit() {
 try {
   await page.goto(base + "/demo", { waitUntil: "networkidle" });
   await audit();
-  assert.match(await page.locator(".hero-copy").innerText(), /鉢皿/);
+  assert.match(await page.locator(".hero-copy").innerText(), /鶏そぼろ/);
   await page.screenshot({
     path: "/tmp/lifelog-public-demo-desktop.png",
     fullPage: true,
