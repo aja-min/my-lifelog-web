@@ -46,7 +46,7 @@ async function audit() {
 try {
   await page.goto(base + "/demo", { waitUntil: "networkidle" });
   await audit();
-  assert.match(await page.locator(".hero-copy").innerText(), /10km/);
+  assert.match(await page.locator(".hero-copy").innerText(), /鉢皿/);
   await page.screenshot({
     path: "/tmp/lifelog-public-demo-desktop.png",
     fullPage: true,
@@ -67,7 +67,7 @@ try {
   await page.waitForURL("**/demo/log/2026-09-22");
   await audit();
   await page.getByText("Raw Markdownを見る").click();
-  assert.match(await page.locator(".raw-markdown pre").innerText(), /5km/);
+  assert.match(await page.locator(".raw-markdown pre").innerText(), /陶芸/);
   await page
     .locator(".sidebar")
     .getByRole("link", { name: "アイデア", exact: true })
@@ -78,7 +78,7 @@ try {
   await page.waitForURL("**type=otherIdeas");
   assert.equal(await page.locator(".idea-card").count(), 9);
   await audit();
-  for (const q of ["ランニング", "パン", "小説", "AI"]) {
+  for (const q of ["陶芸", "ハーブ", "刺繍", "星座"]) {
     await page.goto(base + "/demo/search");
     await page.getByRole("textbox", { name: "Life Logを全文検索" }).fill(q);
     await page.getByRole("button", { name: "検索", exact: true }).click();
@@ -111,7 +111,7 @@ try {
     "/demo",
     "/demo/calendar",
     "/demo/ideas",
-    "/demo/search?q=パン",
+    "/demo/search?q=刺繍",
     "/demo/next-actions",
     "/demo/settings",
     "/demo/log/2026-09-30",

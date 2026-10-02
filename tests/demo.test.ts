@@ -31,11 +31,11 @@ test("nine local fictional days use the existing parser, including all three ide
     );
   }
   assert.equal(logs[4].work.length, 0);
-  assert.match(logs[0].summary!, /5km/);
-  assert.match(logs.at(-1)!.summary!, /10km/);
+  assert.match(logs[0].summary!, /陶芸/);
+  assert.match(logs.at(-1)!.summary!, /鉢皿/);
 });
 test("LT keywords find multiple days; unknown queries do not fall back to another data source", () => {
-  for (const q of ["ランニング", "パン", "小説", "AI"])
+  for (const q of ["陶芸", "ハーブ", "刺繍", "星座"])
     assert.ok(searchLogs(logs, q).length >= 3, q);
   assert.equal(searchLogs(logs, "存在しないキーワード").length, 0);
 });
