@@ -50,3 +50,9 @@ export type LifeLog = {
   sections: LogSection[];
   rawMarkdown: string;
 };
+
+export type LogCollection = {
+  logs: LifeLog[];
+  state: "ready" | "unconfigured" | "error";
+  demo: boolean;
+};

@@ -230,3 +230,64 @@ PC（1440px）とiPhone相当（390px）で、リンク遷移・検索・カレ�
 | デプロイ後も設定が反映されない   | Production環境変数を確認してRedeploy                                              |
 
 参考：[Next.js認証](https://nextjs.org/docs/app/guides/authentication)、[Google OAuthプロバイダー](https://next-auth.js.org/providers/google)、[Drive files.list](https://developers.google.com/workspace/drive/api/reference/rest/v3/files/list)、[Driveファイル共有](https://developers.google.com/workspace/drive/api/guides/manage-sharing)。
+
+## 公開Demo Mode（LT・QRコード共有用）
+
+本番サイトの **[/demo](https://my-lifelog-web.vercel.app/demo)** は、Googleログイン不要の公開デモです。ローカルでは `npm run dev` 後に [http://localhost:3000/demo](http://localhost:3000/demo) を開きます。Google関連の環境変数や `DEMO_MODE=true` の設定は不要です。
+
+既存の `DEMO_MODE` は従来のローカル開発用の設定です。新しい `/demo` はそれとは独立しており、`next start` とVercelでも常に公開デモとして動作します。通常版の認証やDriveアクセスを省略する設定ではありません。
+
+### データと画面の分離
+
+- 通常版：既存の `requireUser` → `getLifeLogs` → Google Drive → `parseLifeLog` → 共通画面。
+- 公開デモ：`getDemoLifeLogs` → **`data/demo/*.md` だけ** → 同じ `parseLifeLog` → 同じ共通画面。
+- 共通画面は `components/views/`、カードなどは従来の `components/journal.tsx`。デモ専用の画面コピーはありません。
+- `app/demo` は認証付きの `(journal)` レイアウトの外側にあります。認証を迂回する条件を通常版に追加せず、独立した公開ルートとして提供します。
+- デモ側の依存関係には `lib/auth.ts`、`lib/googleDrive.ts`、`lib/lifeLogs.ts`、NextAuth、Google認証ライブラリを含めません。サービスアカウント、OAuth、Drive API、本番検索を使わず、取得失敗時にも本番へ切り替えません。
+- デモの検索は、9日分の架空データをメモリ上で検索します。
+- ナビゲーション・カード・キーワード・日付・検索フォームは `/demo` 内へ遷移します。共有リンクコンポーネントはデモ内の許可された宛先に限定し、デモMarkdownのリンクはテキスト表示にします。
+- URLを直接書き換えて通常ルートへ移動しても、従来どおり通常版の認証が必要です。既に本人としてログインしたブラウザの権限は取り消しません。LTでは未ログインの別ブラウザやプライベートウィンドウを使うと操作ミスを避けられます。
+
+### ルートと発表の流れ
+
+| URL                         | 内容                                           |
+| --------------------------- | ---------------------------------------------- |
+| `/demo`                     | 最新日の概要・発見・最近の記録                 |
+| `/demo/calendar`            | 月間カレンダー、9日分の記録                    |
+| `/demo/log/2026-09-22`      | 初日の5kmランニングなどの日記                  |
+| `/demo/ideas`               | 小説・文章／人生・生活／その他の27件のアイデア |
+| `/demo/search?q=ランニング` | 複数日の横断検索                               |
+| `/demo/next-actions`        | 架空のNext Action一覧                          |
+| `/demo/settings`            | デモの説明・記録数のみ（実アカウント情報なし） |
+
+実装上は `app/demo/[[...path]]/page.tsx` で許可されたルートだけを振り分けます。不明なURLや存在しない日付はデモ用の404画面になり、戻るリンクもデモ内です。
+
+おすすめの操作順：Home → Calendar → 9月22日 → Ideas → Searchで「ランニング」「パン」「小説」「AI」。カレンダーの「記録月」ボタンは最新のサンプルがある月へ戻るため、発表日が変わっても使えます。
+
+### デモデータを追加・編集する
+
+1. `data/demo/Lifelog_YYYYMMDD.md` を追加または編集します。日付はファイル名から取得します。
+2. 現在は **2026年9月22日〜30日の9日分**。すべて新しく作成した架空の内容で、実際の日記の匿名化コピーではありません。
+3. 同じフォルダのファイルを参考に、番号・絵文字付きの見出し、アイデアの小見出し、Next Actionの「やること」「期限」などを記述します。見出しの解析ルールは既存パーサーをそのまま使用します。
+4. 実在する個人名、メール、住所、職場名、認証情報、実日記を入れないでください。**このフォルダは公開リポジトリとデモで公開されます。**
+5. `npm test` と `/demo` で確認します。日数や件数を変えた場合は `tests/demo.test.ts` と `tests/demo-browser.mjs` の期待値も更新してください。
+6. `main` にpushすると、接続済みのVercelが再ビルドします。Markdownは `outputFileTracingIncludes` で実行環境へ同梱されるため、追加したファイルも再デプロイ後に利用できます。
+
+### デモの検証
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+# 本番相当のローカル確認
+npm start -- --port 3100 --hostname 127.0.0.1
+# 別ターミナル。Google Chromeが必要です
+node tests/demo-browser.mjs
+```
+
+`tests/demo.test.ts` は、デモデータと既存パーサー、複数日検索、リンクの範囲制限、デモからの依存関係を再帰的に検証します。実際のデモ取得関数をGoogle環境変数なし・fetch禁止で実行するテストも含みます。
+
+`tests/demo-browser.mjs` は新規の未認証ブラウザでLT操作・日付移動・検索結果・404・390px表示を確認します。ブラウザからの通常版ルート、API、外部通信は遮断し、1件でも発生すると失敗します。サーバー側のGoogle非依存は別途依存関係テストと取得関数テストで確認します。
+
+Vercel確認は `TEST_BASE_URL=https://my-lifelog-web.vercel.app node tests/demo-browser.mjs` で実行できます。本番の通常版は引き続きログイン必須で、デモ閲覧のためのOAuth設定変更は不要です。

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/journal-link";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -16,7 +16,7 @@ import {
   CloudOff,
 } from "lucide-react";
 import type { LifeLog, SectionKind } from "@/lib/types";
-import type { LogCollection } from "@/lib/lifeLogs";
+import type { LogCollection } from "@/lib/types";
 import { formatDate, monthGrid, todayTokyo } from "@/lib/dates";
 import { Markdown } from "./markdown";
 

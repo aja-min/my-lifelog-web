@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 const config: NextConfig = {
   poweredByHeader: false,
+  outputFileTracingIncludes: { "/*": ["./data/demo/*.md"] },
   devIndicators: false,
   async headers() {
     return [

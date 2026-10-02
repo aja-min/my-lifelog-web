@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link, { useJournalBasePath } from "./journal-link";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
@@ -20,7 +20,9 @@ const links = [
   ["/settings", "Settings", "設定", Settings],
 ] as const;
 export function Navigation({ demo }: { demo: boolean }) {
-  const path = usePathname();
+  const pathname = usePathname();
+  const basePath = useJournalBasePath();
+  const path = pathname.slice(basePath.length) || "/";
   return (
     <>
       <aside className="sidebar">

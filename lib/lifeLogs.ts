@@ -5,11 +5,8 @@ import { driveConfigured, listDailyFiles, readDailyFile } from "./googleDrive";
 import { parseLifeLog } from "./parseLifeLog";
 import { demoLogs } from "./demo";
 import type { LifeLog } from "./types";
-export type LogCollection = {
-  logs: LifeLog[];
-  state: "ready" | "unconfigured" | "error";
-  demo: boolean;
-};
+import type { LogCollection } from "./types";
+export type { LogCollection } from "./types";
 export const getLifeLogs = cache(async (): Promise<LogCollection> => {
   await requireUser();
   if (demoEnabled()) return { logs: demoLogs(), state: "ready", demo: true };
